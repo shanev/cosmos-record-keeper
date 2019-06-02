@@ -28,10 +28,10 @@ func (k RecordKeeper) Store(ctx sdk.Context) sdk.KVStore {
 }
 
 // NextID increments and returns the next available id by 1
-func (k RecordKeeper) NextID(ctx sdk.Context) (id int64) {
+func (k RecordKeeper) NextID(ctx sdk.Context) (id uint64) {
 	idBytes := k.Store(ctx).Get(k.lenKey())
 	if idBytes == nil {
-		initialIndex := int64(1)
+		initialIndex := uint64(1)
 		k.SetLen(ctx, initialIndex)
 
 		return initialIndex
@@ -49,7 +49,7 @@ func (k RecordKeeper) NextID(ctx sdk.Context) (id int64) {
 }
 
 // SetLen sets the len metadata in the store for incrementing ids
-func (k RecordKeeper) SetLen(ctx sdk.Context, len int64) {
+func (k RecordKeeper) SetLen(ctx sdk.Context, len uint64) {
 	idBytes, err := json.Marshal(len)
 	if err != nil {
 		panic(err)
@@ -90,7 +90,7 @@ func (k RecordKeeper) Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error
 }
 
 // IDKey returns the key for a given index
-func (k RecordKeeper) IDKey(id int64) []byte {
+func (k RecordKeeper) IDKey(id uint64) []byte {
 	return []byte(fmt.Sprintf("%s%d", k.StorePrefix(), id))
 }
 
