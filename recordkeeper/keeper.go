@@ -12,7 +12,7 @@ type RecordKeeper struct {
 	storeKey sdk.StoreKey
 }
 
-// NewRecordKeeper creates a new parent keeper for module keepers to embed
+// NewRecordKeeper creates a new record keeper for module keepers to embed
 func NewRecordKeeper(storeKey sdk.StoreKey) RecordKeeper {
 	return RecordKeeper{storeKey}
 }
