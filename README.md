@@ -16,32 +16,31 @@ type Keeper struct {
 ### Initialization
 
 ```go
-    storeKey := sdk.NewKVStoreKey("record")
-    keeper := Keeper{
-        &NewRecordKeeper(storeKey),
-    }
+keeper := Keeper{
+    &NewRecordKeeper(storeKey, codec),
+}
 ```
 
 ### Adding
 
 ```go
-    record := Record{}
-    id := keeper.Add(ctx, record)
+record := Record{}
+id := keeper.Add(ctx, record)
 ```
 
 ### Getting
 
 ```go
-    record := keeper.Get(ctx, id)
+record := keeper.Get(ctx, id)
 ```
 
 ### Iterating
 
 ```go
-    keeper.Each(ctx, func(recordBytes []byte) bool {
-        var r Record
-        json.Unmarshal(recordBytes, &r)
-        // do something with `Record` r
-        return true
-    })
+keeper.Each(ctx, func(recordBytes []byte) bool {
+    var r Record
+    json.Unmarshal(recordBytes, &r)
+    // do something with `Record` r
+    return true
+})
 ```
