@@ -8,6 +8,16 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// Uint64IterableKeeper defines methods for the active record pattern
+type Uint64IterableKeeper interface {
+	Add(ctx sdk.Context, value interface{}) uint64
+	EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool) (err sdk.Error)
+	Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error)
+	Get(ctx sdk.Context, key uint64, value interface{}) sdk.Error
+	IncrementID(ctx sdk.Context) (id uint64)
+	Set(ctx sdk.Context, key uint64, value []byte)
+}
+
 // RecordKeeper data type with a default codec
 type RecordKeeper struct {
 	storeKey sdk.StoreKey
@@ -21,7 +31,7 @@ func NewRecordKeeper(storeKey sdk.StoreKey, codec *codec.Codec) RecordKeeper {
 
 // Add adds a value to the store
 func (k RecordKeeper) Add(ctx sdk.Context, value interface{}) uint64 {
-	id := k.NextID(ctx)
+	id := k.IncrementID(ctx)
 	valueBytes := k.codec.MustMarshalBinaryLengthPrefixed(value)
 	k.Set(ctx, id, valueBytes)
 
@@ -69,8 +79,8 @@ func (k RecordKeeper) Get(ctx sdk.Context, key uint64, value interface{}) sdk.Er
 	return nil
 }
 
-// NextID increments the index and stores the new value
-func (k RecordKeeper) NextID(ctx sdk.Context) (id uint64) {
+// IncrementID increments the index and stores the new value
+func (k RecordKeeper) IncrementID(ctx sdk.Context) (id uint64) {
 	idBytes := k.store(ctx).Get(k.lenKey())
 	if idBytes == nil {
 		initialIndex := uint64(1)
