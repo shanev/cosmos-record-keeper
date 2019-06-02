@@ -17,34 +17,24 @@ func NewRecordKeeper(storeKey sdk.StoreKey) RecordKeeper {
 	return RecordKeeper{storeKey}
 }
 
-// StoreKey returns the default store key for the keeper
-func (k RecordKeeper) StoreKey() sdk.StoreKey {
-	return k.storeKey
-}
-
 // Set sets a key, value pair in the store
 func (k RecordKeeper) Set(ctx sdk.Context, key uint64, value []byte) {
 	idBytes := k.idKey(key)
-	k.Store(ctx).Set(idBytes, value)
+	k.store(ctx).Set(idBytes, value)
 }
 
 // Get gets a value given a key
 func (k RecordKeeper) Get(ctx sdk.Context, key uint64) []byte {
 	idBytes := k.idKey(key)
-	return k.Store(ctx).Get(idBytes)
-}
-
-// Store returns the default KVStore for the keeper
-func (k RecordKeeper) Store(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.StoreKey())
+	return k.store(ctx).Get(idBytes)
 }
 
 // NextID increments and returns the next available id by 1
 func (k RecordKeeper) NextID(ctx sdk.Context) (id uint64) {
-	idBytes := k.Store(ctx).Get(k.lenKey())
+	idBytes := k.store(ctx).Get(k.lenKey())
 	if idBytes == nil {
 		initialIndex := uint64(1)
-		k.SetLen(ctx, initialIndex)
+		k.setLen(ctx, initialIndex)
 
 		return initialIndex
 	}
@@ -55,28 +45,15 @@ func (k RecordKeeper) NextID(ctx sdk.Context) (id uint64) {
 	}
 
 	nextID := id + 1
-	k.SetLen(ctx, nextID)
+	k.setLen(ctx, nextID)
 
 	return nextID
-}
-
-// SetLen sets the len metadata in the store for incrementing ids
-func (k RecordKeeper) SetLen(ctx sdk.Context, len uint64) {
-	idBytes, err := json.Marshal(len)
-	if err != nil {
-		panic(err)
-	}
-	k.Store(ctx).Set(k.lenKey(), idBytes)
-}
-
-func (k RecordKeeper) lenKey() []byte {
-	return []byte(k.storeKey.Name() + ":len")
 }
 
 // EachPrefix calls `fn` for each record in a store with a given prefix. Iteration will stop if `fn` returns false
 func (k RecordKeeper) EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool) (err sdk.Error) {
 	var val []byte
-	store := k.Store(ctx)
+	store := k.store(ctx)
 	iter := store.Iterator(nil, nil)
 	if prefix != "" {
 		iter = sdk.KVStorePrefixIterator(store, []byte(prefix))
@@ -101,11 +78,26 @@ func (k RecordKeeper) Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error
 	return k.EachPrefix(ctx, "", fn)
 }
 
-// StorePrefix returns the root prefix of the key-value store
-func (k RecordKeeper) StorePrefix() string {
-	return fmt.Sprintf("%s:id:", k.StoreKey().Name())
+func (k RecordKeeper) idKey(id uint64) []byte {
+	return []byte(fmt.Sprintf("%s%d", k.storePrefix(), id))
 }
 
-func (k RecordKeeper) idKey(id uint64) []byte {
-	return []byte(fmt.Sprintf("%s%d", k.StorePrefix(), id))
+func (k RecordKeeper) lenKey() []byte {
+	return []byte(k.storeKey.Name() + ":len")
+}
+
+func (k RecordKeeper) setLen(ctx sdk.Context, len uint64) {
+	idBytes, err := json.Marshal(len)
+	if err != nil {
+		panic(err)
+	}
+	k.store(ctx).Set(k.lenKey(), idBytes)
+}
+
+func (k RecordKeeper) store(ctx sdk.Context) sdk.KVStore {
+	return ctx.KVStore(k.storeKey)
+}
+
+func (k RecordKeeper) storePrefix() string {
+	return fmt.Sprintf("%s:id:", k.storeKey.Name())
 }
