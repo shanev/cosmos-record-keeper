@@ -38,16 +38,17 @@ id := keeper.Add(ctx, record)
 ### Getting
 
 ```go
-record := keeper.Get(ctx, id)
+var record Record
+keeper.Get(ctx, id, &record)
 ```
 
 ### Iterating
 
 ```go
-keeper.Each(ctx, func(recordBytes []byte) bool {
-    var r Record
-    json.Unmarshal(recordBytes, &r)
-    // do something with `Record` r
-    return true
-})
+// keeper.Each(ctx, func(recordBytes []byte) bool {
+//     var r Record
+//     json.Unmarshal(recordBytes, &r)
+//     // do something with `Record` r
+//     return true
+// })
 ```
