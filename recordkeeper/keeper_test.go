@@ -30,13 +30,11 @@ func TestRecord(t *testing.T) {
 	recordBytes, err := json.Marshal(record)
 	assert.NoError(t, err)
 
-	idBytes := keeper.IDKey(record.ID)
-
 	// set in kvstore
-	keeper.Store(ctx).Set(idBytes, recordBytes)
+	keeper.Set(ctx, record.ID, recordBytes)
 
 	// getting
-	expectedRecordBytes := keeper.Store(ctx).Get(idBytes)
+	expectedRecordBytes := keeper.Get(ctx, record.ID)
 	assert.Equal(t, expectedRecordBytes, recordBytes)
 
 	// test iteration

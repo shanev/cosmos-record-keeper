@@ -34,24 +34,14 @@ type Record struct {
     record := Record{
         ID: keeper.NextID(ctx),
     }
-
-    // marshal record
     recordBytes, _ := json.Marshal(record)
-
-    // set in kvstore
-    keeper.Store(ctx).Set(
-        keeper.IDKey(record.ID),
-        recordBytes)
+    keeper.Set(ctx, record.ID, recordBytes)
 ```
 
 ### Getting
 
 ```go
-    // generate the key for a given id 
-    idBytes := keeper.IDKey(record.ID)
-    // get the bytes for the given key
-    recordBytes := keeper.Store(ctx).Get(idBytes)
-    // unmarshal the record
+    recordBytes := keeper.Get(ctx, record.ID)
     var r Record
     json.Unmarshal(recordBytes, &r)
 ```

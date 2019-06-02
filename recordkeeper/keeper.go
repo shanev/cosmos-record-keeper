@@ -22,6 +22,18 @@ func (k RecordKeeper) StoreKey() sdk.StoreKey {
 	return k.storeKey
 }
 
+// Set sets a key, value pair in the store
+func (k RecordKeeper) Set(ctx sdk.Context, key uint64, value []byte) {
+	idBytes := k.idKey(key)
+	k.Store(ctx).Set(idBytes, value)
+}
+
+// Get gets a value given a key
+func (k RecordKeeper) Get(ctx sdk.Context, key uint64) []byte {
+	idBytes := k.idKey(key)
+	return k.Store(ctx).Get(idBytes)
+}
+
 // Store returns the default KVStore for the keeper
 func (k RecordKeeper) Store(ctx sdk.Context) sdk.KVStore {
 	return ctx.KVStore(k.StoreKey())
@@ -89,12 +101,11 @@ func (k RecordKeeper) Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error
 	return k.EachPrefix(ctx, "", fn)
 }
 
-// IDKey returns the key for a given index
-func (k RecordKeeper) IDKey(id uint64) []byte {
-	return []byte(fmt.Sprintf("%s%d", k.StorePrefix(), id))
-}
-
 // StorePrefix returns the root prefix of the key-value store
 func (k RecordKeeper) StorePrefix() string {
 	return fmt.Sprintf("%s:id:", k.StoreKey().Name())
+}
+
+func (k RecordKeeper) idKey(id uint64) []byte {
+	return []byte(fmt.Sprintf("%s%d", k.StorePrefix(), id))
 }
