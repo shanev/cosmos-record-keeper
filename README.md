@@ -1,6 +1,6 @@
-# Cosmos Record Keeper
+![logo](./logo.jpg)
 
-A `uint64` indexed iterable type keeper for [Cosmos SDK](https://github.com/cosmos/cosmos-sdk).
+A `uint64` indexed, iterable type keeper for [Cosmos SDK](https://github.com/cosmos/cosmos-sdk).
 
 ## Example
 
