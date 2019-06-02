@@ -1,67 +1,47 @@
 package recordkeeper
 
 import (
+	"encoding/json"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	amino "github.com/tendermint/go-amino"
 )
 
-// Utilities for all module keepers
-
-// ReadKeeper defines a module interface that facilitates read only access
-// to truchain data. Modules keepers should implement this base interface.
-type ReadKeeper interface {
-	GetCodec() *amino.Codec
-	GetStoreKey() sdk.StoreKey
-	Each(sdk.Context, func([]byte) bool) sdk.Error
-}
-
-// WriteKeeper defines an interface for read/write operations on a KVStore
-type WriteKeeper interface {
-	ReadKeeper
-
-	GetStore(ctx sdk.Context) sdk.KVStore
-	SetLen(ctx sdk.Context, len int64)
-}
-
-// Keeper data type with a default codec
-type Keeper struct {
-	codec    *amino.Codec
+// RecordKeeper data type with a default codec
+type RecordKeeper struct {
 	storeKey sdk.StoreKey
 }
 
-// NewKeeper creates a new parent keeper for module keepers to embed
-func NewKeeper(codec *amino.Codec, storeKey sdk.StoreKey) Keeper {
-	return Keeper{codec, storeKey}
+// NewRecordKeeper creates a new parent keeper for module keepers to embed
+func NewRecordKeeper(storeKey sdk.StoreKey) RecordKeeper {
+	return RecordKeeper{storeKey}
 }
 
-// GetCodec returns the base keeper's underlying codec
-func (k Keeper) GetCodec() *amino.Codec {
-	return k.codec
-}
-
-// GetStoreKey returns the default store key for the keeper
-func (k Keeper) GetStoreKey() sdk.StoreKey {
+// StoreKey returns the default store key for the keeper
+func (k RecordKeeper) StoreKey() sdk.StoreKey {
 	return k.storeKey
 }
 
-// GetStore returns the default KVStore for the keeper
-func (k Keeper) GetStore(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.GetStoreKey())
+// Store returns the default KVStore for the keeper
+func (k RecordKeeper) Store(ctx sdk.Context) sdk.KVStore {
+	return ctx.KVStore(k.StoreKey())
 }
 
-// GetNextID increments and returns the next available id by 1
-func (k Keeper) GetNextID(ctx sdk.Context) (id int64) {
-	bz := k.GetStore(ctx).Get(k.lenKey())
-	if bz == nil {
+// NextID increments and returns the next available id by 1
+func (k RecordKeeper) NextID(ctx sdk.Context) (id int64) {
+	idBytes := k.Store(ctx).Get(k.lenKey())
+	if idBytes == nil {
 		initialIndex := int64(1)
 		k.SetLen(ctx, initialIndex)
 
 		return initialIndex
 	}
 
-	k.GetCodec().MustUnmarshalBinaryBare(bz, &id)
+	err := json.Unmarshal(idBytes, &id)
+	if err != nil {
+		panic(err)
+	}
+
 	nextID := id + 1
 	k.SetLen(ctx, nextID)
 
@@ -69,19 +49,22 @@ func (k Keeper) GetNextID(ctx sdk.Context) (id int64) {
 }
 
 // SetLen sets the len metadata in the store for incrementing ids
-func (k Keeper) SetLen(ctx sdk.Context, len int64) {
-	bz := k.GetCodec().MustMarshalBinaryBare(len)
-	k.GetStore(ctx).Set(k.lenKey(), bz)
+func (k RecordKeeper) SetLen(ctx sdk.Context, len int64) {
+	idBytes, err := json.Marshal(len)
+	if err != nil {
+		panic(err)
+	}
+	k.Store(ctx).Set(k.lenKey(), idBytes)
 }
 
-func (k Keeper) lenKey() []byte {
+func (k RecordKeeper) lenKey() []byte {
 	return []byte(k.storeKey.Name() + ":len")
 }
 
 // EachPrefix calls `fn` for each record in a store with a given prefix. Iteration will stop if `fn` returns false
-func (k Keeper) EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool) (err sdk.Error) {
+func (k RecordKeeper) EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool) (err sdk.Error) {
 	var val []byte
-	store := k.GetStore(ctx)
+	store := k.Store(ctx)
 	iter := store.Iterator(nil, nil)
 	if prefix != "" {
 		iter = sdk.KVStorePrefixIterator(store, []byte(prefix))
@@ -102,16 +85,16 @@ func (k Keeper) EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool)
 }
 
 // Each calls `EachPrefix` with an empty prefix
-func (k Keeper) Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error) {
+func (k RecordKeeper) Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error) {
 	return k.EachPrefix(ctx, "", fn)
 }
 
-// GetIDKey returns the key for a given index
-func (k Keeper) GetIDKey(id int64) []byte {
+// IDKey returns the key for a given index
+func (k RecordKeeper) IDKey(id int64) []byte {
 	return []byte(fmt.Sprintf("%s%d", k.StorePrefix(), id))
 }
 
 // StorePrefix returns the root prefix of the key-value store
-func (k Keeper) StorePrefix() string {
-	return fmt.Sprintf("%s:id:", k.GetStoreKey().Name())
+func (k RecordKeeper) StorePrefix() string {
+	return fmt.Sprintf("%s:id:", k.StoreKey().Name())
 }
