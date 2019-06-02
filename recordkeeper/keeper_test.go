@@ -1,9 +1,9 @@
 package recordkeeper
 
 import (
-	"encoding/json"
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
@@ -12,25 +12,27 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-type Record struct{}
-
 func TestRecord(t *testing.T) {
 	ctx, keeper := mockDB()
 	assert.NotNil(t, ctx)
 	assert.NotNil(t, keeper)
 
-	// add to the store
+	type Record struct{}
+
+	// adding
 	record := Record{}
 	id := keeper.Add(ctx, record)
 
 	// getting
-	expectedRecord := keeper.Get(ctx, id)
+	var expectedRecord Record
+	err := keeper.Get(ctx, id, &expectedRecord)
+	assert.NoError(t, err)
 	assert.Equal(t, expectedRecord, record)
 
-	// test iteration
+	// iteration
 	keeper.Each(ctx, func(recordBytes []byte) bool {
 		var r Record
-		err := json.Unmarshal(recordBytes, &r)
+		keeper.codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, &r)
 		assert.NoError(t, err)
 		assert.Equal(t, uint64(1), id)
 		return true
@@ -48,7 +50,8 @@ func mockDB() (sdk.Context, RecordKeeper) {
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 
-	keeper := NewRecordKeeper(storeKey)
+	codec := codec.New()
+	keeper := NewRecordKeeper(storeKey, codec)
 
 	return ctx, keeper
 }

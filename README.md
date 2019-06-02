@@ -38,7 +38,8 @@ id := keeper.Add(ctx, record)
 ### Getting
 
 ```go
-record := keeper.Get(ctx, id)
+var record Record
+keeper.Get(ctx, id, &record)
 ```
 
 ### Iterating
@@ -46,7 +47,7 @@ record := keeper.Get(ctx, id)
 ```go
 keeper.Each(ctx, func(recordBytes []byte) bool {
     var r Record
-    json.Unmarshal(recordBytes, &r)
+    keeper.codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, &r)
     // do something with `Record` r
     return true
 })
