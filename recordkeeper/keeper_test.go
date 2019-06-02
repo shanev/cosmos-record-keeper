@@ -30,13 +30,14 @@ func TestRecord(t *testing.T) {
 	assert.Equal(t, expectedRecord, record)
 
 	// iteration
-	keeper.Each(ctx, func(recordBytes []byte) bool {
+	err = keeper.Each(ctx, func(recordBytes []byte) bool {
 		var r Record
 		keeper.codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, &r)
 		assert.NoError(t, err)
 		assert.Equal(t, uint64(1), id)
 		return true
 	})
+	assert.NoError(t, err)
 }
 
 func mockDB() (sdk.Context, RecordKeeper) {
@@ -46,7 +47,10 @@ func mockDB() (sdk.Context, RecordKeeper) {
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(storeKey, sdk.StoreTypeIAVL, db)
-	ms.LoadLatestVersion()
+	err := ms.LoadLatestVersion()
+	if err != nil {
+		panic(err)
+	}
 
 	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
 
