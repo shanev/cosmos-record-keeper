@@ -2,10 +2,10 @@ GO_BIN ?= go
 OS := $(shell uname -s)
 
 test: deps
-	@$(GO_BIN) test recordkeeper/*.go
+	@GO111MODULE=on $(GO_BIN) test recordkeeper/*.go
 
 deps:
-	@$(GO_BIN) mod tidy
+	@GO111MODULE=on $(GO_BIN) mod tidy
 
 test-cover: deps
 	@GO111MODULE=on $(GO_BIN) test recordkeeper/*.go -cover -coverprofile=c.out
