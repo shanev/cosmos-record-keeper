@@ -1,7 +1,6 @@
 package recordkeeper
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -33,7 +32,7 @@ func TestRecord(t *testing.T) {
 	// iteration
 	keeper.Each(ctx, func(recordBytes []byte) bool {
 		var r Record
-		err := json.Unmarshal(recordBytes, &r)
+		keeper.codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, &r)
 		assert.NoError(t, err)
 		assert.Equal(t, uint64(1), id)
 		return true
