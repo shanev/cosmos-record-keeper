@@ -32,8 +32,7 @@ func NewRecordKeeper(storeKey sdk.StoreKey, codec *codec.Codec) RecordKeeper {
 // Add adds a value to the store
 func (k RecordKeeper) Add(ctx sdk.Context, value interface{}) uint64 {
 	id := k.IncrementID(ctx)
-	valueBytes := k.codec.MustMarshalBinaryLengthPrefixed(value)
-	k.Set(ctx, id, valueBytes)
+	k.Set(ctx, id, value)
 
 	return id
 }
@@ -96,9 +95,9 @@ func (k RecordKeeper) IncrementID(ctx sdk.Context) (id uint64) {
 }
 
 // Set sets a key, value pair in the store
-func (k RecordKeeper) Set(ctx sdk.Context, key uint64, value []byte) {
-	idBytes := k.idKey(key)
-	k.store(ctx).Set(idBytes, value)
+func (k RecordKeeper) Set(ctx sdk.Context, key uint64, value interface{}) {
+	valueBytes := k.codec.MustMarshalBinaryLengthPrefixed(value)
+	k.setBytes(ctx, key, valueBytes)
 }
 
 // Internal
@@ -109,6 +108,11 @@ func (k RecordKeeper) idKey(id uint64) []byte {
 
 func (k RecordKeeper) lenKey() []byte {
 	return []byte(k.storeKey.Name() + ":len")
+}
+
+func (k RecordKeeper) setBytes(ctx sdk.Context, key uint64, value []byte) {
+	idBytes := k.idKey(key)
+	k.store(ctx).Set(idBytes, value)
 }
 
 func (k RecordKeeper) setLen(ctx sdk.Context, len uint64) {

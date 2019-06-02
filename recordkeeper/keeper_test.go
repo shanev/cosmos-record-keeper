@@ -22,6 +22,7 @@ func TestRecord(t *testing.T) {
 	// adding
 	record := Record{}
 	id := keeper.Add(ctx, record)
+	assert.Equal(t, uint64(1), id)
 
 	// getting
 	var expectedRecord Record
