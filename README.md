@@ -37,3 +37,14 @@ type Keeper struct {
     var r Record
     json.Unmarshal(recordBytes, &r)
 ```
+
+### Iterating
+
+```go
+    keeper.Each(ctx, func(recordBytes []byte) bool {
+        var r Record
+        json.Unmarshal(recordBytes, &r)
+        // do something with `Record` r
+        return true
+    })
+```
