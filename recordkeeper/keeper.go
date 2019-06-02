@@ -18,9 +18,14 @@ func NewRecordKeeper(storeKey sdk.StoreKey) RecordKeeper {
 }
 
 // Add adds a value to the store
-func (k RecordKeeper) Add(ctx sdk.Context, value []byte) uint64 {
-	id := k.NextID(ctx)
-	k.Set(ctx, id, value)
+// Panics on unmarshal error
+func (k RecordKeeper) Add(ctx sdk.Context, value interface{}) uint64 {
+	id := k.nextID(ctx)
+	valueBytes, err := json.Marshal(value)
+	if err != nil {
+		panic(err)
+	}
+	k.Set(ctx, id, valueBytes)
 	return id
 }
 
@@ -31,30 +36,17 @@ func (k RecordKeeper) Set(ctx sdk.Context, key uint64, value []byte) {
 }
 
 // Get gets a value given a key
-func (k RecordKeeper) Get(ctx sdk.Context, key uint64) []byte {
+func (k RecordKeeper) Get(ctx sdk.Context, key uint64) interface{} {
 	idBytes := k.idKey(key)
-	return k.store(ctx).Get(idBytes)
-}
+	recordBytes := k.store(ctx).Get(idBytes)
 
-// NextID increments and returns the next available id by 1
-func (k RecordKeeper) NextID(ctx sdk.Context) (id uint64) {
-	idBytes := k.store(ctx).Get(k.lenKey())
-	if idBytes == nil {
-		initialIndex := uint64(1)
-		k.setLen(ctx, initialIndex)
-
-		return initialIndex
-	}
-
-	err := json.Unmarshal(idBytes, &id)
+	var r Record
+	err := json.Unmarshal(recordBytes, &r)
 	if err != nil {
 		panic(err)
 	}
 
-	nextID := id + 1
-	k.setLen(ctx, nextID)
-
-	return nextID
+	return r
 }
 
 // EachPrefix calls `fn` for each record in a store with a given prefix. Iteration will stop if `fn` returns false
@@ -91,6 +83,26 @@ func (k RecordKeeper) idKey(id uint64) []byte {
 
 func (k RecordKeeper) lenKey() []byte {
 	return []byte(k.storeKey.Name() + ":len")
+}
+
+func (k RecordKeeper) nextID(ctx sdk.Context) (id uint64) {
+	idBytes := k.store(ctx).Get(k.lenKey())
+	if idBytes == nil {
+		initialIndex := uint64(1)
+		k.setLen(ctx, initialIndex)
+
+		return initialIndex
+	}
+
+	err := json.Unmarshal(idBytes, &id)
+	if err != nil {
+		panic(err)
+	}
+
+	nextID := id + 1
+	k.setLen(ctx, nextID)
+
+	return nextID
 }
 
 func (k RecordKeeper) setLen(ctx sdk.Context, len uint64) {

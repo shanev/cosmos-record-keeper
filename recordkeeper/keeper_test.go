@@ -19,21 +19,16 @@ func TestRecord(t *testing.T) {
 	assert.NotNil(t, ctx)
 	assert.NotNil(t, keeper)
 
-	record := Record{}
-
-	// marshal record
-	recordBytes, err := json.Marshal(record)
-	assert.NoError(t, err)
-
 	// add to the store
-	id := keeper.Add(ctx, recordBytes)
+	record := Record{}
+	id := keeper.Add(ctx, record)
 
 	// getting
-	expectedRecordBytes := keeper.Get(ctx, id)
-	assert.Equal(t, expectedRecordBytes, recordBytes)
+	expectedRecord := keeper.Get(ctx, id)
+	assert.Equal(t, expectedRecord, record)
 
 	// test iteration
-	err = keeper.Each(ctx, func(recordBytes []byte) bool {
+	keeper.Each(ctx, func(recordBytes []byte) bool {
 		var r Record
 		err := json.Unmarshal(recordBytes, &r)
 		assert.NoError(t, err)

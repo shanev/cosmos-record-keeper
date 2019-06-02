@@ -26,16 +26,13 @@ type Keeper struct {
 
 ```go
     record := Record{}
-    recordBytes, _ := json.Marshal(record)
-    id := keeper.Add(ctx, recordBytes)
+    id := keeper.Add(ctx, record)
 ```
 
 ### Getting
 
 ```go
-    recordBytes := keeper.Get(ctx, id)
-    var r Record
-    json.Unmarshal(recordBytes, &r)
+    record := keeper.Get(ctx, id)
 ```
 
 ### Iterating
