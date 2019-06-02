@@ -8,8 +8,8 @@ deps:
 	@$(GO_BIN) mod tidy
 
 test-cover: deps
-	@$(GO_BIN) test recordkeeper/*.go -cover -coverprofile=c.out
-	@$(GO_BIN) tool cover -html=c.out -o coverage.html
+	@GO111MODULE=on $(GO_BIN) test recordkeeper/*.go -cover -coverprofile=c.out
+	@GO111MODULE=on $(GO_BIN) tool cover -html=c.out -o coverage.html
 
 # --- Linting
 lint:
