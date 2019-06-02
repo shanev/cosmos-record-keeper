@@ -17,6 +17,13 @@ func NewRecordKeeper(storeKey sdk.StoreKey) RecordKeeper {
 	return RecordKeeper{storeKey}
 }
 
+// Add adds a value to the store
+func (k RecordKeeper) Add(ctx sdk.Context, value []byte) uint64 {
+	id := k.NextID(ctx)
+	k.Set(ctx, id, value)
+	return id
+}
+
 // Set sets a key, value pair in the store
 func (k RecordKeeper) Set(ctx sdk.Context, key uint64, value []byte) {
 	idBytes := k.idKey(key)

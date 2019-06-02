@@ -13,35 +13,27 @@ type Keeper struct {
 }
 ```
 
-Define an index field for a type:
-
-```go
-type Record struct {
-    ID uint64
-}
-```
-
 ### Initialization
 
 ```go
-    storeKey := sdk.NewKVStoreKey("records")
-    keeper := Keeper{&NewRecordKeeper(storeKey)}
+    storeKey := sdk.NewKVStoreKey("record")
+    keeper := Keeper{
+        &NewRecordKeeper(storeKey),
+    }
 ```
 
-### Setting
+### Adding
 
 ```go
-    record := Record{
-        ID: keeper.NextID(ctx),
-    }
+    record := Record{}
     recordBytes, _ := json.Marshal(record)
-    keeper.Set(ctx, record.ID, recordBytes)
+    id := keeper.Add(ctx, recordBytes)
 ```
 
 ### Getting
 
 ```go
-    recordBytes := keeper.Get(ctx, record.ID)
+    recordBytes := keeper.Get(ctx, id)
     var r Record
     json.Unmarshal(recordBytes, &r)
 ```

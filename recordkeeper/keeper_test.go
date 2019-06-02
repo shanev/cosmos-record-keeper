@@ -12,29 +12,24 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-type Record struct {
-	ID uint64
-}
+type Record struct{}
 
 func TestRecord(t *testing.T) {
 	ctx, keeper := mockDB()
 	assert.NotNil(t, ctx)
 	assert.NotNil(t, keeper)
 
-	record := Record{
-		ID: keeper.NextID(ctx),
-	}
-	assert.Equal(t, uint64(1), record.ID)
+	record := Record{}
 
 	// marshal record
 	recordBytes, err := json.Marshal(record)
 	assert.NoError(t, err)
 
-	// set in kvstore
-	keeper.Set(ctx, record.ID, recordBytes)
+	// add to the store
+	id := keeper.Add(ctx, recordBytes)
 
 	// getting
-	expectedRecordBytes := keeper.Get(ctx, record.ID)
+	expectedRecordBytes := keeper.Get(ctx, id)
 	assert.Equal(t, expectedRecordBytes, recordBytes)
 
 	// test iteration
@@ -42,7 +37,7 @@ func TestRecord(t *testing.T) {
 		var r Record
 		err := json.Unmarshal(recordBytes, &r)
 		assert.NoError(t, err)
-		assert.Equal(t, uint64(1), r.ID)
+		assert.Equal(t, uint64(1), id)
 		return true
 	})
 }
