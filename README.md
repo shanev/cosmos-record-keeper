@@ -1,12 +1,19 @@
 ![logo](./logo.jpg)
 
-A `uint64` indexed, iterable type keeper for [Cosmos SDK](https://github.com/cosmos/cosmos-sdk).
+A `uint64` indexed, iterable type keeper for [Cosmos SDK](https://github.com/cosmos/cosmos-sdk) that implements the [Active Record pattern](https://en.wikipedia.org/wiki/Active_record_pattern).
+
+## Getting Started
+
+### Install library
+
+```
+go get github.com/shanev/cosmos-record-keeper
+```
 
 ## Example
 
 Embed a `RecordKeeper` struct inside a `Keeper`.
 
-i.e:
 ```go
 type Keeper struct {
     RecordKeeper
