@@ -42,7 +42,7 @@ func (k RecordKeeper) Add(ctx sdk.Context, value interface{}) uint64 {
 // Delete deletes a value from the store
 // NOTE: This retains the key, and sets the value to nil.
 // Make sure to check for nil when getting values from the store.
-func (k RecordKeeper) Delete(ctx sdk.Context, id uint64, t interface{}) {
+func (k RecordKeeper) Delete(ctx sdk.Context, id uint64) {
 	k.Set(ctx, id, nil)
 }
 
