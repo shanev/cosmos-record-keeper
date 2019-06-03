@@ -3,6 +3,7 @@
 A `uint64` indexed, iterable type keeper for [Cosmos SDK](https://github.com/cosmos/cosmos-sdk) that implements the [Active Record pattern](https://en.wikipedia.org/wiki/Active_record_pattern).
 
 [![CircleCI](https://circleci.com/gh/shanev/cosmos-record-keeper.svg?style=svg)](https://circleci.com/gh/shanev/cosmos-record-keeper)
+[![Go Report Card](https://goreportcard.com/badge/github.com/shanev/cosmos-record-keeper)](https://goreportcard.com/report/github.com/shanev/cosmos-record-keeper)
 
 ## Getting Started
 
