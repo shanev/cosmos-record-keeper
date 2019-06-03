@@ -11,6 +11,7 @@ import (
 // Uint64IterableKeeper defines methods for the active record pattern
 type Uint64IterableKeeper interface {
 	Add(ctx sdk.Context, value interface{}) uint64
+	Delete(ctx sdk.Context, id uint64, t interface{})
 	EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool) (err sdk.Error)
 	Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error)
 	Get(ctx sdk.Context, key uint64, value interface{}) sdk.Error
@@ -35,6 +36,13 @@ func (k RecordKeeper) Add(ctx sdk.Context, value interface{}) uint64 {
 	k.Set(ctx, id, value)
 
 	return id
+}
+
+// Delete deletes a value from the store
+// NOTE: This retains the key, and sets the value to nil.
+// Make sure to check for nil when getting values from the store.
+func (k RecordKeeper) Delete(ctx sdk.Context, id uint64, t interface{}) {
+	k.Set(ctx, id, nil)
 }
 
 // EachPrefix calls `fn` for each record in a store with a given prefix.
