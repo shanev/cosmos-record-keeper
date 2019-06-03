@@ -54,3 +54,16 @@ keeper.Each(ctx, func(recordBytes []byte) bool {
     return true
 })
 ```
+
+## API
+
+```go
+Add(ctx sdk.Context, value interface{}) uint64
+Delete(ctx sdk.Context, id uint64, t interface{})
+EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool) (err sdk.Error)
+Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error)
+Get(ctx sdk.Context, key uint64, value interface{}) sdk.Error
+IncrementID(ctx sdk.Context) (id uint64)
+Set(ctx sdk.Context, key uint64, value []byte)
+Update(ctx sdk.Context, key uint64, value interface{}) uint64
+```
