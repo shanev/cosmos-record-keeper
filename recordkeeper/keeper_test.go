@@ -12,8 +12,26 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func TestRecord(t *testing.T) {
-	ctx, keeper := mockDB()
+func TestStringRecordKeeper(t *testing.T) {
+	ctx, keeper := mockStringKeeper()
+	assert.NotNil(t, ctx)
+	assert.NotNil(t, keeper)
+
+	type Record struct{}
+
+	// setter
+	record := Record{}
+	keeper.Set(ctx, "key1", record)
+
+	// getter
+	var expectedRecord Record
+	err := keeper.Get(ctx, "key1", &expectedRecord)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedRecord, record)
+}
+
+func TestUint64RecordKeeper(t *testing.T) {
+	ctx, keeper := mockUint64Keeper()
 	assert.NotNil(t, ctx)
 	assert.NotNil(t, keeper)
 
@@ -41,7 +59,7 @@ func TestRecord(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func mockDB() (sdk.Context, RecordKeeper) {
+func mockUint64Keeper() (sdk.Context, RecordKeeper) {
 	db := dbm.NewMemDB()
 
 	storeKey := sdk.NewKVStoreKey("records")
@@ -57,6 +75,26 @@ func mockDB() (sdk.Context, RecordKeeper) {
 
 	codec := codec.New()
 	keeper := NewRecordKeeper(storeKey, codec)
+
+	return ctx, keeper
+}
+
+func mockStringKeeper() (sdk.Context, StringRecordKeeper) {
+	db := dbm.NewMemDB()
+
+	storeKey := sdk.NewKVStoreKey("records")
+
+	ms := store.NewCommitMultiStore(db)
+	ms.MountStoreWithDB(storeKey, sdk.StoreTypeIAVL, db)
+	err := ms.LoadLatestVersion()
+	if err != nil {
+		panic(err)
+	}
+
+	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
+
+	codec := codec.New()
+	keeper := NewStringRecordKeeper(storeKey, codec)
 
 	return ctx, keeper
 }

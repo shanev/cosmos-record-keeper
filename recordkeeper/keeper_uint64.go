@@ -16,9 +16,12 @@ type Uint64IterableKeeper interface {
 	Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error)
 	Get(ctx sdk.Context, key uint64, value interface{}) sdk.Error
 	IncrementID(ctx sdk.Context) uint64
-	Set(ctx sdk.Context, key uint64, value []byte)
+	Set(ctx sdk.Context, key uint64, value interface{})
 	Update(ctx sdk.Context, key uint64, value interface{}) uint64
 }
+
+// interface conformance check
+var _ Uint64IterableKeeper = RecordKeeper{}
 
 // RecordKeeper data type with a default codec
 type RecordKeeper struct {
