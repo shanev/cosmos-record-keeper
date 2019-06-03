@@ -50,7 +50,7 @@ func TestUint64RecordKeeper(t *testing.T) {
 	// iteration
 	err = keeper.Each(ctx, func(recordBytes []byte) bool {
 		var r Record
-		keeper.codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, &r)
+		keeper.Codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, &r)
 		assert.NoError(t, err)
 		assert.Equal(t, uint64(1), id)
 		return true

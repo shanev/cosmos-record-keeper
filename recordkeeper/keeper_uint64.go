@@ -25,8 +25,8 @@ var _ Uint64IterableKeeper = RecordKeeper{}
 
 // RecordKeeper data type with a default codec
 type RecordKeeper struct {
-	storeKey sdk.StoreKey
-	codec    *codec.Codec
+	StoreKey sdk.StoreKey
+	Codec    *codec.Codec
 }
 
 // NewRecordKeeper creates a new record keeper for module keepers to embed
@@ -87,7 +87,7 @@ func (k RecordKeeper) Get(ctx sdk.Context, key uint64, value interface{}) sdk.Er
 	if recordBytes == nil {
 		return sdk.ErrInternal("Value not found at index " + strconv.FormatUint(key, 10))
 	}
-	k.codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, value)
+	k.Codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, value)
 
 	return nil
 }
@@ -101,7 +101,7 @@ func (k RecordKeeper) IncrementID(ctx sdk.Context) (id uint64) {
 		return initialIndex
 	}
 
-	k.codec.MustUnmarshalBinaryBare(idBytes, &id)
+	k.Codec.MustUnmarshalBinaryBare(idBytes, &id)
 	nextID := id + 1
 	k.SetLen(ctx, nextID)
 
@@ -110,13 +110,13 @@ func (k RecordKeeper) IncrementID(ctx sdk.Context) (id uint64) {
 
 // Set sets a key, value pair in the store
 func (k RecordKeeper) Set(ctx sdk.Context, key uint64, value interface{}) {
-	valueBytes := k.codec.MustMarshalBinaryLengthPrefixed(value)
+	valueBytes := k.Codec.MustMarshalBinaryLengthPrefixed(value)
 	k.setBytes(ctx, key, valueBytes)
 }
 
 // SetLen sets the value of len for the store
 func (k RecordKeeper) SetLen(ctx sdk.Context, len uint64) {
-	idBytes := k.codec.MustMarshalBinaryBare(len)
+	idBytes := k.Codec.MustMarshalBinaryBare(len)
 	k.store(ctx).Set(k.lenKey(), idBytes)
 }
 
@@ -134,7 +134,7 @@ func (k RecordKeeper) idKey(id uint64) []byte {
 }
 
 func (k RecordKeeper) lenKey() []byte {
-	return []byte(k.storeKey.Name() + ":len")
+	return []byte(k.StoreKey.Name() + ":len")
 }
 
 func (k RecordKeeper) setBytes(ctx sdk.Context, key uint64, value []byte) {
@@ -143,9 +143,9 @@ func (k RecordKeeper) setBytes(ctx sdk.Context, key uint64, value []byte) {
 }
 
 func (k RecordKeeper) store(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.storeKey)
+	return ctx.KVStore(k.StoreKey)
 }
 
 func (k RecordKeeper) storePrefix() string {
-	return fmt.Sprintf("%s:id:", k.storeKey.Name())
+	return fmt.Sprintf("%s:id:", k.StoreKey.Name())
 }
