@@ -97,13 +97,13 @@ func (k RecordKeeper) IncrementID(ctx sdk.Context) (id uint64) {
 	idBytes := k.store(ctx).Get(k.lenKey())
 	if idBytes == nil {
 		initialIndex := uint64(1)
-		k.setLen(ctx, initialIndex)
+		k.SetLen(ctx, initialIndex)
 		return initialIndex
 	}
 
 	k.codec.MustUnmarshalBinaryBare(idBytes, &id)
 	nextID := id + 1
-	k.setLen(ctx, nextID)
+	k.SetLen(ctx, nextID)
 
 	return nextID
 }
@@ -112,6 +112,12 @@ func (k RecordKeeper) IncrementID(ctx sdk.Context) (id uint64) {
 func (k RecordKeeper) Set(ctx sdk.Context, key uint64, value interface{}) {
 	valueBytes := k.codec.MustMarshalBinaryLengthPrefixed(value)
 	k.setBytes(ctx, key, valueBytes)
+}
+
+// SetLen sets the value of len for the store
+func (k RecordKeeper) SetLen(ctx sdk.Context, len uint64) {
+	idBytes := k.codec.MustMarshalBinaryBare(len)
+	k.store(ctx).Set(k.lenKey(), idBytes)
 }
 
 // Update updates a value to the store
@@ -134,11 +140,6 @@ func (k RecordKeeper) lenKey() []byte {
 func (k RecordKeeper) setBytes(ctx sdk.Context, key uint64, value []byte) {
 	idBytes := k.idKey(key)
 	k.store(ctx).Set(idBytes, value)
-}
-
-func (k RecordKeeper) setLen(ctx sdk.Context, len uint64) {
-	idBytes := k.codec.MustMarshalBinaryBare(len)
-	k.store(ctx).Set(k.lenKey(), idBytes)
 }
 
 func (k RecordKeeper) store(ctx sdk.Context) sdk.KVStore {
