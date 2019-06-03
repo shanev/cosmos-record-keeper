@@ -7,7 +7,7 @@ import (
 
 // StringIterableKeeper defines methods for the active record pattern
 type StringIterableKeeper interface {
-	Get(ctx sdk.Context, key string, value interface{}) sdk.Error
+	Get(ctx sdk.Context, key string, value interface{})
 	Set(ctx sdk.Context, key string, value interface{})
 }
 
@@ -26,15 +26,13 @@ func NewStringRecordKeeper(storeKey sdk.StoreKey, codec *codec.Codec) StringReco
 }
 
 // Get gets a value given a key
-func (k StringRecordKeeper) Get(ctx sdk.Context, key string, value interface{}) sdk.Error {
+func (k StringRecordKeeper) Get(ctx sdk.Context, key string, value interface{}) {
 	keyBytes := []byte(key)
 	valueBytes := k.store(ctx).Get(keyBytes)
 	if valueBytes == nil {
-		return nil
+		return
 	}
 	k.codec.MustUnmarshalBinaryLengthPrefixed(valueBytes, value)
-
-	return nil
 }
 
 // Set sets a key, value pair in the store

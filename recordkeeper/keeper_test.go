@@ -25,8 +25,7 @@ func TestStringRecordKeeper(t *testing.T) {
 
 	// getter
 	var expectedRecord Record
-	err := keeper.Get(ctx, "key1", &expectedRecord)
-	assert.NoError(t, err)
+	keeper.Get(ctx, "key1", &expectedRecord)
 	assert.Equal(t, expectedRecord, record)
 }
 
