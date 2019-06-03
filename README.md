@@ -31,7 +31,7 @@ type Keeper struct {
 
 ```go
 keeper := Keeper{
-    &NewRecordKeeper(storeKey, codec),
+    RecordKeeper(storeKey, codec),
 }
 ```
 
