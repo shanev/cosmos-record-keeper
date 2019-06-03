@@ -11,7 +11,7 @@ import (
 // Uint64IterableKeeper defines methods for the active record pattern
 type Uint64IterableKeeper interface {
 	Add(ctx sdk.Context, value interface{}) uint64
-	Delete(ctx sdk.Context, id uint64, t interface{})
+	Delete(ctx sdk.Context, id uint64)
 	EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool) (err sdk.Error)
 	Each(ctx sdk.Context, fn func([]byte) bool) (err sdk.Error)
 	Get(ctx sdk.Context, key uint64, value interface{}) sdk.Error
