@@ -17,6 +17,7 @@ type Uint64IterableKeeper interface {
 	Get(ctx sdk.Context, key uint64, value interface{}) sdk.Error
 	IncrementID(ctx sdk.Context) (id uint64)
 	Set(ctx sdk.Context, key uint64, value []byte)
+	Update(ctx sdk.Context, key uint64, value interface{}) uint64
 }
 
 // RecordKeeper data type with a default codec
@@ -106,6 +107,13 @@ func (k RecordKeeper) IncrementID(ctx sdk.Context) (id uint64) {
 func (k RecordKeeper) Set(ctx sdk.Context, key uint64, value interface{}) {
 	valueBytes := k.codec.MustMarshalBinaryLengthPrefixed(value)
 	k.setBytes(ctx, key, valueBytes)
+}
+
+// Update updates a value to the store
+func (k RecordKeeper) Update(ctx sdk.Context, key uint64, value interface{}) uint64 {
+	k.Set(ctx, key, value)
+
+	return key
 }
 
 // Internal
