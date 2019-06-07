@@ -25,7 +25,7 @@ func (k RecordKeeper) Push(ctx sdk.Context, key, associatedKey sdk.StoreKey, id,
 		key.Name(), id,
 	)
 
-	k.StringSet(ctx, association, id)
+	k.stringSetBare(ctx, association, id)
 }
 
 // Map iterates through associated ids and peforms function `fn`
@@ -54,4 +54,9 @@ func (k RecordKeeper) ReverseMap(ctx sdk.Context, associatedKey sdk.StoreKey, as
 		k.Codec.MustUnmarshalBinaryBare(iter.Value(), &id)
 		fn(id)
 	}
+}
+
+func (k RecordKeeper) stringSetBare(ctx sdk.Context, key string, value interface{}) {
+	valueBytes := k.Codec.MustMarshalBinaryBare(value)
+	k.stringSetBytes(ctx, key, valueBytes)
 }

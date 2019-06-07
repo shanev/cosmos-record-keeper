@@ -12,25 +12,8 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 )
 
-func TestStringRecordKeeper(t *testing.T) {
-	ctx, keeper := mockRecordKeeper()
-	assert.NotNil(t, ctx)
-	assert.NotNil(t, keeper)
-
-	type Record struct{}
-
-	// setter
-	record := Record{}
-	keeper.StringSet(ctx, "key1", record)
-
-	// getter
-	var expectedRecord Record
-	keeper.StringGet(ctx, "key1", &expectedRecord)
-	assert.Equal(t, expectedRecord, record)
-}
-
-func TestUint64RecordKeeper(t *testing.T) {
-	ctx, keeper := mockRecordKeeper()
+func TestUint64Keys(t *testing.T) {
+	ctx, keeper, _ := mockRecordKeeper()
 	assert.NotNil(t, ctx)
 	assert.NotNil(t, keeper)
 
@@ -58,13 +41,41 @@ func TestUint64RecordKeeper(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func mockRecordKeeper() (sdk.Context, RecordKeeper) {
+func TestStringKeys(t *testing.T) {
+	ctx, keeper, _ := mockRecordKeeper()
+	assert.NotNil(t, ctx)
+	assert.NotNil(t, keeper)
+
+	type Record struct{}
+
+	// setter
+	record := Record{}
+	keeper.StringSet(ctx, "key1", record)
+
+	// getter
+	var expectedRecord Record
+	keeper.StringGet(ctx, "key1", &expectedRecord)
+	assert.Equal(t, expectedRecord, record)
+}
+
+func TestAssociationList(t *testing.T) {
+	ctx, k, k2 := mockRecordKeeper()
+
+	k.Push(ctx, k.StoreKey, k2.StoreKey, uint64(1), uint64(2))
+	k.Map(ctx, k2.StoreKey, uint64(2), func(id uint64) {
+		assert.Equal(t, uint64(1), id)
+	})
+}
+
+func mockRecordKeeper() (sdk.Context, RecordKeeper, RecordKeeper) {
 	db := dbm.NewMemDB()
 
 	storeKey := sdk.NewKVStoreKey("records")
+	storeKey2 := sdk.NewKVStoreKey("records2")
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(storeKey, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(storeKey2, sdk.StoreTypeIAVL, db)
 	err := ms.LoadLatestVersion()
 	if err != nil {
 		panic(err)
@@ -74,6 +85,7 @@ func mockRecordKeeper() (sdk.Context, RecordKeeper) {
 
 	codec := codec.New()
 	keeper := NewRecordKeeper(storeKey, codec)
+	keeper2 := NewRecordKeeper(storeKey2, codec)
 
-	return ctx, keeper
+	return ctx, keeper, keeper2
 }
