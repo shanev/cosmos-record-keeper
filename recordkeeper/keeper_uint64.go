@@ -8,8 +8,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Uint64IterableKeeper defines methods for the active record pattern
-type Uint64IterableKeeper interface {
+// Uint64KeyedIterableKeeper defines methods for the active record pattern
+type Uint64KeyedIterableKeeper interface {
 	Add(ctx sdk.Context, value interface{}) uint64
 	Delete(ctx sdk.Context, id uint64) uint64
 	EachPrefix(ctx sdk.Context, prefix string, fn func([]byte) bool) (err sdk.Error)
@@ -21,7 +21,7 @@ type Uint64IterableKeeper interface {
 }
 
 // interface conformance check
-var _ Uint64IterableKeeper = RecordKeeper{}
+var _ Uint64KeyedIterableKeeper = RecordKeeper{}
 
 // RecordKeeper data type with a default codec
 type RecordKeeper struct {
@@ -126,8 +126,6 @@ func (k RecordKeeper) Update(ctx sdk.Context, key uint64, value interface{}) uin
 
 	return key
 }
-
-// Internal
 
 func (k RecordKeeper) idKey(id uint64) []byte {
 	return []byte(fmt.Sprintf("%s%d", k.storePrefix(), id))
