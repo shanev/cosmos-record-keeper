@@ -11,6 +11,7 @@ import (
 type AssociationList interface {
 	Add(ctx sdk.Context, key, associatedKey sdk.StoreKey, id, associatedID uint64)
 	Map(ctx sdk.Context, key sdk.StoreKey, id uint64, fn func(uint64))
+	ReverseMap(ctx sdk.Context, associatedKey sdk.StoreKey, associatedID uint64, fn func(uint64))
 }
 
 // interface conformance check
