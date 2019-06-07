@@ -38,6 +38,8 @@ keeper := Keeper{
 
 ### Adding
 
+Adds an object to a store and increments a unique id that will track the object.
+
 ```go
 record := Record{}
 id := k.Add(ctx, record)
@@ -48,6 +50,15 @@ id := k.Add(ctx, record)
 ```go
 var record Record
 k.Get(ctx, id, &record)
+```
+
+### Setting
+
+If you want control over an object's unique id, you can manually set it:
+
+```go
+id := k.IncrementID(ctx)
+k.Set(ctx, id, Record{})
 ```
 
 ### Iterating
