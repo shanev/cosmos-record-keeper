@@ -4,14 +4,14 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// StringIterableKeeper defines methods for the active record pattern
-type StringIterableKeeper interface {
+// StringKeyedKeeper defines methods for the active record pattern
+type StringKeyedKeeper interface {
 	StringGet(ctx sdk.Context, key string, value interface{})
 	StringSet(ctx sdk.Context, key string, value interface{})
 }
 
 // interface conformance check
-var _ StringIterableKeeper = RecordKeeper{}
+var _ StringKeyedKeeper = RecordKeeper{}
 
 // StringGet gets a value given a key
 func (k RecordKeeper) StringGet(ctx sdk.Context, key string, value interface{}) {
@@ -28,8 +28,6 @@ func (k RecordKeeper) StringSet(ctx sdk.Context, key string, value interface{}) 
 	valueBytes := k.Codec.MustMarshalBinaryLengthPrefixed(value)
 	k.stringSetBytes(ctx, key, valueBytes)
 }
-
-// Internal
 
 func (k RecordKeeper) stringSetBytes(ctx sdk.Context, key string, valueBytes []byte) {
 	keyBytes := []byte(key)
