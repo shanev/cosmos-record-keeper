@@ -13,7 +13,7 @@ import (
 )
 
 func TestStringRecordKeeper(t *testing.T) {
-	ctx, keeper := mockStringKeeper()
+	ctx, keeper := mockRecordKeeper()
 	assert.NotNil(t, ctx)
 	assert.NotNil(t, keeper)
 
@@ -21,16 +21,16 @@ func TestStringRecordKeeper(t *testing.T) {
 
 	// setter
 	record := Record{}
-	keeper.Set(ctx, "key1", record)
+	keeper.StringSet(ctx, "key1", record)
 
 	// getter
 	var expectedRecord Record
-	keeper.Get(ctx, "key1", &expectedRecord)
+	keeper.StringGet(ctx, "key1", &expectedRecord)
 	assert.Equal(t, expectedRecord, record)
 }
 
 func TestUint64RecordKeeper(t *testing.T) {
-	ctx, keeper := mockUint64Keeper()
+	ctx, keeper := mockRecordKeeper()
 	assert.NotNil(t, ctx)
 	assert.NotNil(t, keeper)
 
@@ -58,7 +58,7 @@ func TestUint64RecordKeeper(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func mockUint64Keeper() (sdk.Context, RecordKeeper) {
+func mockRecordKeeper() (sdk.Context, RecordKeeper) {
 	db := dbm.NewMemDB()
 
 	storeKey := sdk.NewKVStoreKey("records")
@@ -74,26 +74,6 @@ func mockUint64Keeper() (sdk.Context, RecordKeeper) {
 
 	codec := codec.New()
 	keeper := NewRecordKeeper(storeKey, codec)
-
-	return ctx, keeper
-}
-
-func mockStringKeeper() (sdk.Context, StringRecordKeeper) {
-	db := dbm.NewMemDB()
-
-	storeKey := sdk.NewKVStoreKey("records")
-
-	ms := store.NewCommitMultiStore(db)
-	ms.MountStoreWithDB(storeKey, sdk.StoreTypeIAVL, db)
-	err := ms.LoadLatestVersion()
-	if err != nil {
-		panic(err)
-	}
-
-	ctx := sdk.NewContext(ms, abci.Header{}, false, log.NewNopLogger())
-
-	codec := codec.New()
-	keeper := NewStringRecordKeeper(storeKey, codec)
 
 	return ctx, keeper
 }
