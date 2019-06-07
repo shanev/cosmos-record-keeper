@@ -7,7 +7,7 @@ import (
 )
 
 // AssociationList is a foreign key association between two stores
-// assoc:storeKey:id:ID:associatedStoreKey:id:associatedID -> associatedID
+// associatedStoreKey:id:[associatedID]:storeKey:id:[ID]: -> [ID]
 type AssociationList interface {
 	Add(ctx sdk.Context, key, associatedKey sdk.StoreKey, id, associatedID uint64)
 	Map(ctx sdk.Context, key sdk.StoreKey, id uint64, fn func(uint64))
@@ -18,28 +18,39 @@ var _ AssociationList = StringRecordKeeper{}
 
 // Add adds a new association pair
 func (k StringRecordKeeper) Add(ctx sdk.Context, key, associatedKey sdk.StoreKey, id, associatedID uint64) {
-	tuple := fmt.Sprintf(
-		"assoc:%s:id:%d:%s:id:%d",
+	association := fmt.Sprintf(
+		"%s:id:%d:%s:id:%d",
+		associatedKey.Name(), associatedID,
 		key.Name(), id,
-		associatedKey.Name(), associatedID)
+	)
 
-	k.Set(ctx, tuple, associatedID)
+	k.Set(ctx, association, id)
 }
 
 // Map iterates through associated ids and peforms function `fn`
-func (k StringRecordKeeper) Map(ctx sdk.Context, key sdk.StoreKey, id uint64, fn func(uint64)) {
-	searchKey := fmt.Sprintf(
-		"assoc:%s:id:%d:",
-		key.Name(), id)
+func (k StringRecordKeeper) Map(ctx sdk.Context, associatedKey sdk.StoreKey, associatedID uint64, fn func(uint64)) {
+	prefix := fmt.Sprintf("%s:id:%d:", associatedKey.Name(), associatedID)
+	prefixBytes := []byte(prefix)
 
-	prefix := []byte(searchKey)
-
-	// iterates through keyspace to find all value ids
-	iter := sdk.KVStorePrefixIterator(k.store(ctx), prefix)
+	iter := sdk.KVStorePrefixIterator(k.store(ctx), prefixBytes)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		var associatedID uint64
-		k.codec.MustUnmarshalBinaryBare(iter.Value(), &associatedID)
-		fn(associatedID)
+		var id uint64
+		k.codec.MustUnmarshalBinaryBare(iter.Value(), &id)
+		fn(id)
+	}
+}
+
+// ReverseMap reverse iterates through associated ids and peforms function `fn`
+func (k StringRecordKeeper) ReverseMap(ctx sdk.Context, associatedKey sdk.StoreKey, associatedID uint64, fn func(uint64)) {
+	prefix := fmt.Sprintf("%s:id:%d:", associatedKey.Name(), associatedID)
+	prefixBytes := []byte(prefix)
+
+	iter := sdk.KVStoreReversePrefixIterator(k.store(ctx), prefixBytes)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		var id uint64
+		k.codec.MustUnmarshalBinaryBare(iter.Value(), &id)
+		fn(id)
 	}
 }
