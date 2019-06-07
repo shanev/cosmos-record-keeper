@@ -6,16 +6,16 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Uint64AssociationList is a foreign key association between two stores
+// Uint64AssociationKeeper is a foreign key association between two stores
 // associatedStoreKey:id:[associatedID]:storeKey:id:[ID]: -> [ID]
-type Uint64AssociationList interface {
+type Uint64AssociationKeeper interface {
 	Push(ctx sdk.Context, key, associatedKey sdk.StoreKey, id, associatedID uint64)
 	Map(ctx sdk.Context, key sdk.StoreKey, id uint64, fn func(uint64))
 	ReverseMap(ctx sdk.Context, associatedKey sdk.StoreKey, associatedID uint64, fn func(uint64))
 }
 
 // interface conformance check
-var _ Uint64AssociationList = RecordKeeper{}
+var _ Uint64AssociationKeeper = RecordKeeper{}
 
 // Push adds a new association pair
 func (k RecordKeeper) Push(ctx sdk.Context, key, associatedKey sdk.StoreKey, id, associatedID uint64) {
