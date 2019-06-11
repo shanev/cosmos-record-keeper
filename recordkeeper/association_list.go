@@ -37,7 +37,7 @@ func (k RecordKeeper) Map(ctx sdk.Context, associatedKey sdk.StoreKey, associate
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		var id uint64
-		k.Codec.MustUnmarshalBinaryBare(iter.Value(), &id)
+		k.codec.MustUnmarshalBinaryBare(iter.Value(), &id)
 		fn(id)
 	}
 }
@@ -51,12 +51,12 @@ func (k RecordKeeper) ReverseMap(ctx sdk.Context, associatedKey sdk.StoreKey, as
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		var id uint64
-		k.Codec.MustUnmarshalBinaryBare(iter.Value(), &id)
+		k.codec.MustUnmarshalBinaryBare(iter.Value(), &id)
 		fn(id)
 	}
 }
 
 func (k RecordKeeper) stringSetBare(ctx sdk.Context, key string, value interface{}) {
-	valueBytes := k.Codec.MustMarshalBinaryBare(value)
+	valueBytes := k.codec.MustMarshalBinaryBare(value)
 	k.stringSetBytes(ctx, key, valueBytes)
 }

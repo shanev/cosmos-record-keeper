@@ -33,7 +33,7 @@ func TestUint64Keys(t *testing.T) {
 	// iteration
 	err = keeper.Each(ctx, func(recordBytes []byte) bool {
 		var r Record
-		keeper.Codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, &r)
+		keeper.codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, &r)
 		assert.NoError(t, err)
 		assert.Equal(t, uint64(1), id)
 		return true
@@ -61,8 +61,8 @@ func TestStringKeys(t *testing.T) {
 func TestAssociationList(t *testing.T) {
 	ctx, k, k2 := mockRecordKeeper()
 
-	k.Push(ctx, k.StoreKey, k2.StoreKey, uint64(1), uint64(2))
-	k.Map(ctx, k2.StoreKey, uint64(2), func(id uint64) {
+	k.Push(ctx, k.storeKey, k2.storeKey, uint64(1), uint64(2))
+	k.Map(ctx, k2.storeKey, uint64(2), func(id uint64) {
 		assert.Equal(t, uint64(1), id)
 	})
 }
