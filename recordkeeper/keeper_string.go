@@ -20,12 +20,12 @@ func (k RecordKeeper) StringGet(ctx sdk.Context, key string, value interface{}) 
 	if valueBytes == nil {
 		return
 	}
-	k.Codec.MustUnmarshalBinaryLengthPrefixed(valueBytes, value)
+	k.codec.MustUnmarshalBinaryLengthPrefixed(valueBytes, value)
 }
 
 // StringSet sets a key, value pair in the store
 func (k RecordKeeper) StringSet(ctx sdk.Context, key string, value interface{}) {
-	valueBytes := k.Codec.MustMarshalBinaryLengthPrefixed(value)
+	valueBytes := k.codec.MustMarshalBinaryLengthPrefixed(value)
 	k.stringSetBytes(ctx, key, valueBytes)
 }
 

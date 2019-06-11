@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -22,17 +21,6 @@ type Uint64KeyedIterableKeeper interface {
 
 // interface conformance check
 var _ Uint64KeyedIterableKeeper = RecordKeeper{}
-
-// RecordKeeper data type with a default codec
-type RecordKeeper struct {
-	StoreKey sdk.StoreKey
-	Codec    *codec.Codec
-}
-
-// NewRecordKeeper creates a new record keeper for module keepers to embed
-func NewRecordKeeper(storeKey sdk.StoreKey, codec *codec.Codec) RecordKeeper {
-	return RecordKeeper{storeKey, codec}
-}
 
 // Add adds a value to the store
 func (k RecordKeeper) Add(ctx sdk.Context, value interface{}) uint64 {
@@ -87,7 +75,7 @@ func (k RecordKeeper) Get(ctx sdk.Context, key uint64, value interface{}) sdk.Er
 	if recordBytes == nil {
 		return sdk.ErrInternal("Value not found at index " + strconv.FormatUint(key, 10))
 	}
-	k.Codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, value)
+	k.codec.MustUnmarshalBinaryLengthPrefixed(recordBytes, value)
 
 	return nil
 }
@@ -101,7 +89,7 @@ func (k RecordKeeper) IncrementID(ctx sdk.Context) (id uint64) {
 		return initialIndex
 	}
 
-	k.Codec.MustUnmarshalBinaryBare(idBytes, &id)
+	k.codec.MustUnmarshalBinaryBare(idBytes, &id)
 	nextID := id + 1
 	k.SetLen(ctx, nextID)
 
@@ -110,13 +98,13 @@ func (k RecordKeeper) IncrementID(ctx sdk.Context) (id uint64) {
 
 // Set sets a key, value pair in the store
 func (k RecordKeeper) Set(ctx sdk.Context, key uint64, value interface{}) {
-	valueBytes := k.Codec.MustMarshalBinaryLengthPrefixed(value)
+	valueBytes := k.codec.MustMarshalBinaryLengthPrefixed(value)
 	k.setBytes(ctx, key, valueBytes)
 }
 
 // SetLen sets the value of len for the store
 func (k RecordKeeper) SetLen(ctx sdk.Context, len uint64) {
-	idBytes := k.Codec.MustMarshalBinaryBare(len)
+	idBytes := k.codec.MustMarshalBinaryBare(len)
 	k.store(ctx).Set(k.lenKey(), idBytes)
 }
 
@@ -132,7 +120,7 @@ func (k RecordKeeper) idKey(id uint64) []byte {
 }
 
 func (k RecordKeeper) lenKey() []byte {
-	return []byte(k.StoreKey.Name() + ":len")
+	return []byte(k.storeKey.Name() + ":len")
 }
 
 func (k RecordKeeper) setBytes(ctx sdk.Context, key uint64, value []byte) {
@@ -141,9 +129,9 @@ func (k RecordKeeper) setBytes(ctx sdk.Context, key uint64, value []byte) {
 }
 
 func (k RecordKeeper) store(ctx sdk.Context) sdk.KVStore {
-	return ctx.KVStore(k.StoreKey)
+	return ctx.KVStore(k.storeKey)
 }
 
 func (k RecordKeeper) storePrefix() string {
-	return fmt.Sprintf("%s:id:", k.StoreKey.Name())
+	return fmt.Sprintf("%s:id:", k.storeKey.Name())
 }
