@@ -61,10 +61,44 @@ func TestStringKeys(t *testing.T) {
 func TestAssociationList(t *testing.T) {
 	ctx, k, k2 := mockRecordKeeper()
 
-	k.Push(ctx, k.storeKey, k2.storeKey, uint64(1), uint64(2))
+	k.Push(ctx, k.storeKey, k2.storeKey, uint64(100), uint64(2))
+	k.Push(ctx, k.storeKey, k2.storeKey, uint64(200), uint64(2))
+	values := make([]uint64, 0)
 	k.Map(ctx, k2.storeKey, uint64(2), func(id uint64) {
-		assert.Equal(t, uint64(1), id)
+		values = append(values, id)
 	})
+	assert.Len(t, values, 2)
+	assert.Equal(t, []uint64{100,200}, values)
+
+	// Test ReverseMap
+	values = make([]uint64, 0)
+	k.ReverseMap(ctx, k2.storeKey, uint64(2), func(id uint64) {
+		values = append(values, id)
+	})
+	assert.Len(t, values, 2)
+	assert.Equal(t, []uint64{200,100}, values)
+
+
+	address := sdk.AccAddress([]byte("cosmos123xyz"))
+	addressStoreKey := sdk.NewKVStoreKey("address")
+	k.PushWithAddress(ctx, k.storeKey, addressStoreKey, 100, address)
+	k.PushWithAddress(ctx, k.storeKey, addressStoreKey, 200, address)
+
+	values = make([]uint64, 0)
+	k.MapByAddress(ctx, addressStoreKey, address, func(id uint64) {
+		values = append(values, id)
+	})
+	assert.Len(t, values, 2)
+	assert.Equal(t, []uint64{100,200}, values)
+
+	values = make([]uint64, 0)
+	k.ReverseMapByAddress(ctx, addressStoreKey, address, func(id uint64) {
+		values = append(values, id)
+	})
+	assert.Len(t, values, 2)
+	assert.Equal(t, []uint64{200,100}, values)
+
+
 }
 
 func mockRecordKeeper() (sdk.Context, RecordKeeper, RecordKeeper) {
