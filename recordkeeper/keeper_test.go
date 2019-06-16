@@ -64,16 +64,18 @@ func TestAssociationList(t *testing.T) {
 	k.Push(ctx, k.storeKey, k2.storeKey, uint64(100), uint64(2))
 	k.Push(ctx, k.storeKey, k2.storeKey, uint64(200), uint64(2))
 	values := make([]uint64, 0)
-	k.Map(ctx, k2.storeKey, uint64(2), func(id uint64) {
+	k.Map(ctx, k2.storeKey, uint64(2), func(id uint64) bool {
 		values = append(values, id)
+		return true
 	})
 	assert.Len(t, values, 2)
 	assert.Equal(t, []uint64{100,200}, values)
 
 	// Test ReverseMap
 	values = make([]uint64, 0)
-	k.ReverseMap(ctx, k2.storeKey, uint64(2), func(id uint64) {
+	k.ReverseMap(ctx, k2.storeKey, uint64(2), func(id uint64) bool {
 		values = append(values, id)
+		return true
 	})
 	assert.Len(t, values, 2)
 	assert.Equal(t, []uint64{200,100}, values)
@@ -85,18 +87,38 @@ func TestAssociationList(t *testing.T) {
 	k.PushWithAddress(ctx, k.storeKey, addressStoreKey, 200, address)
 
 	values = make([]uint64, 0)
-	k.MapByAddress(ctx, addressStoreKey, address, func(id uint64) {
+	k.MapByAddress(ctx, addressStoreKey, address, func(id uint64) bool {
 		values = append(values, id)
+		return true
 	})
 	assert.Len(t, values, 2)
 	assert.Equal(t, []uint64{100,200}, values)
 
 	values = make([]uint64, 0)
-	k.ReverseMapByAddress(ctx, addressStoreKey, address, func(id uint64) {
+	k.ReverseMapByAddress(ctx, addressStoreKey, address, func(id uint64) bool {
 		values = append(values, id)
+		return true
 	})
 	assert.Len(t, values, 2)
 	assert.Equal(t, []uint64{200,100}, values)
+
+
+	// test break
+	values = make([]uint64, 0)
+	k.MapByAddress(ctx, addressStoreKey, address, func(id uint64) bool {
+		values = append(values, id)
+		return false
+	})
+	assert.Len(t, values, 1)
+	assert.Equal(t, []uint64{100}, values)
+
+	values = make([]uint64, 0)
+	k.ReverseMapByAddress(ctx, addressStoreKey, address, func(id uint64) bool {
+		values = append(values, id)
+		return false
+	})
+	assert.Len(t, values, 1)
+	assert.Equal(t, []uint64{200}, values)
 
 
 }
